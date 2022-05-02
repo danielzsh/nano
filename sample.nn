@@ -1,0 +1,3 @@
+start
+assign 2 to x
+print(x + 2)
