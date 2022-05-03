@@ -62,6 +62,7 @@ namespace Runner {
             }
             return print;
         }
+        else throw std::string("Unrecognized statement on line " + std::to_string(lexer.line));
     }
     // TODO: operator precedence parsing?
     node Runner::parseExpr() {
@@ -72,6 +73,15 @@ namespace Runner {
             node rhs = std::move(parseTerm());
             if (Node.index() == Int && rhs.index() == Int) {
                 Node = std::make_unique<BinOp<int, int, int>>(std::move(GETINT(Node)), std::move(GETINT(rhs)), op);
+            }
+            if (Node.index() == String && rhs.index() == Int) {
+                Node = std::make_unique<BinOp<std::string, int, std::string>>(std::move(GETSTRING(Node)), std::move(GETINT(rhs)), op);
+            }
+            if (Node.index() == Int && rhs.index() == String) {
+                Node = std::make_unique<BinOp<int, std::string, std::string>>(std::move(GETINT(Node)), std::move(GETSTRING(rhs)), op);
+            }
+            if (Node.index() == String && rhs.index() == String) {
+                Node = std::make_unique<BinOp<std::string, std::string, std::string>>(std::move(GETSTRING(Node)), std::move(GETSTRING(rhs)), op);
             }
             // TODO: add support for other types
         }
@@ -86,6 +96,15 @@ namespace Runner {
             if (Node.index() == Int && rhs.index() == Int) {
                 Node = std::make_unique<BinOp<int, int, int>>(std::move(GETINT(Node)), std::move(GETINT(rhs)), op);
             }
+            if (Node.index() == String && rhs.index() == Int) {
+                Node = std::make_unique<BinOp<std::string, int, std::string>>(std::move(GETSTRING(Node)), std::move(GETINT(rhs)), op);
+            }
+            if (Node.index() == Int && rhs.index() == String) {
+                Node = std::make_unique<BinOp<int, std::string, std::string>>(std::move(GETINT(Node)), std::move(GETSTRING(rhs)), op);
+            }
+            if (Node.index() == String && rhs.index() == String) {
+                Node = std::make_unique<BinOp<std::string, std::string, std::string>>(std::move(GETSTRING(Node)), std::move(GETSTRING(rhs)), op);
+            }
             // TODO: add support for other types
         }
         return Node;
@@ -95,8 +114,8 @@ namespace Runner {
         if (tok == tok_number) {
             double num = lexer.numVal;
             tok = lexer.gettok();
-            if (num == std::floor(num)) return std::make_unique<Num<int>>(num);
-            return std::make_unique<Num<double>>(num);
+            if (num == std::floor(num)) return std::make_unique<Val<int>>(num);
+            return std::make_unique<Val<double>>(num);
         }
         else if (tok == tok_identifier) {
             std::string varName = lexer.identifierStr;
@@ -108,6 +127,11 @@ namespace Runner {
                 return std::make_unique<Var<int>>(varName, st);
             }
             // TODO: add support for other types
+        }
+        else if (tok == tok_string) {
+            std::string str = lexer.identifierStr;
+            tok = lexer.gettok();
+            return std::make_unique<Val<std::string>>(str);
         }
     }
 } // Runner

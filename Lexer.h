@@ -9,7 +9,8 @@
 enum Token {
     tok_identifier = -1,
     tok_number = -2,
-    tok_eof = -3
+    tok_eof = -3,
+    tok_string = -4
 };
 namespace Lexer {
 

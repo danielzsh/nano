@@ -7,8 +7,8 @@ std::string readFile(const std::string& filename)
     return std::string((std::istreambuf_iterator<char>(source)), std::istreambuf_iterator<char>());
 }
 int main() {
-    std::string input = readFile("samples/sample.nn");
-    Runner::Runner runner(input, true);
+    std::string input = readFile("samples/sample2.nn");
+    Runner::Runner runner(input, false);
     try {
         runner.run();
     } catch(std::string e) {

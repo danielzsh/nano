@@ -6,20 +6,28 @@
 #include <iostream>
 namespace Lexer {
     Lexer::Lexer(std::string input, bool jit) {
-        if (jit) this->jit = jit;
+        if (jit) {
+            this->jit = jit;
+            std::cout << ">>>";
+        }
         else this->input = input;
         for (int i = 0; i < keywords.size(); i++) {
             kwd_index[keywords[i]] = i;
         }
     }
     char Lexer::nextChar() {
-        if (jit) return getchar();
+        if (jit) {
+            return getchar();
+        }
         if (++pos >= input.size()) return EOF;
         return input[pos];
     }
     int Lexer::gettok() {
         while (std::isspace(c)) {
-            if (c == '\n') line++;
+            if (c == '\n') {
+                line++;
+                if (jit) std::cout << ">>>";
+            }
             c = nextChar();
         }
         if (std::isalpha(c)) {
@@ -40,6 +48,16 @@ namespace Lexer {
             } while (std::isdigit(c) || c == '.');
             numVal = strtod(numStr.c_str(), nullptr);
             return tok_number;
+        }
+        // string
+        if (c == '\'') {
+            identifierStr = "";
+            while ((c = nextChar()) != '\'') {
+                // std::cout << (c == '\'');
+                identifierStr += c;
+            }
+            c = nextChar();
+            return tok_string;
         }
         if (c == '#') {
             // comment

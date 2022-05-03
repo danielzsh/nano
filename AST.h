@@ -9,6 +9,7 @@
 #include <iostream>
 #include "Stack.h"
 #define GETINT(PTR) std::get<ptr<ASTNode<int>>>(PTR)
+#define GETSTRING(PTR) std::get<ptr<ASTNode<std::string>>>(PTR)
 #define ISTYPE(T1, T2) std::is_same_v<T1, T2>
 enum Type {
     Int = 0,
@@ -30,20 +31,22 @@ public:
 template <typename T>
 ASTNode<T>::~ASTNode() = default;
 using node = std::variant<ptr<ASTNode<int>>, ptr<ASTNode<double>>, ptr<ASTNode<std::string>>>;
+// value
 template <typename T>
-class Num : public ASTNode<T> {
+class Val : public ASTNode<T> {
 public:
     T value;
-    Num(T value) {
+    Val(T value) {
         this -> value = value;
         if constexpr(std::is_same_v<T, int>) this->type = Int;
-        else this->type = Double;
+        else if constexpr(std::is_same_v<T, double>) this->type = Double;
+        else this->type = String;
     }
     T visit() {
         return value;
     }
 };
-// represents binary operations
+// binary operations
 template <typename T1, typename T2, typename T3>
 class BinOp : public ASTNode<T3> {
 public:
@@ -56,6 +59,15 @@ public:
         this->op = op;
         if constexpr((ISTYPE(T1, int)) && (ISTYPE(T2, int))) {
             this->type = Int;
+        }
+        else if constexpr(ISTYPE(T1, std::string) && ISTYPE(T2, int)) {
+            this->type = String;
+        }
+        else if constexpr(ISTYPE(T1, int) && ISTYPE(T2, std::string)) {
+            this->type = String;
+        }
+        else if constexpr(ISTYPE(T1, std::string) && ISTYPE(T2, std::string)) {
+            this->type = String;
         }
         // replace this later
 //        else if (left.index() == String && right.index() == String) {
@@ -88,6 +100,42 @@ inline int BinOp<int, int, int>::visit() {
         return left->visit() * right->visit();
     }
 }
+template <>
+inline std::string BinOp<int, std::string, std::string>::visit() {
+    if (op == '+') {
+        return std::to_string(left->visit()) + right->visit();
+    }
+    if (op == '*') {
+        std::string str = "";
+        int reps = left->visit();
+        std::string cpy = right->visit();
+        for (int i = 0; i < reps; i++) {
+            str += cpy;
+        }
+        return str;
+    } else throw std::string("Cannot perform the following operation on an int and a string: " + std::to_string(op));
+}
+template <>
+inline std::string BinOp<std::string, int, std::string>::visit() {
+    if (op == '+') {
+        return left->visit() + std::to_string(right->visit());
+    }
+    if (op == '*') {
+        std::string str = "";
+        int reps = right->visit();
+        std::string cpy = left->visit();
+        for (int i = 0; i < reps; i++) {
+            str += cpy;
+        }
+        return str;
+    }
+    else throw std::string("Cannot perform the following operation on an int and a string: " + std::to_string(op));
+}
+template <>
+inline std::string BinOp<std::string, std::string, std::string>::visit() {
+    if (op == '+') return left->visit() + right->visit();
+    else throw std::string("Cannot perform the following operation on two strings: " + std::to_string(op));
+}
 class Print : public ASTNode<void> {
 public:
     std::vector<node> exprs;
@@ -100,13 +148,14 @@ public:
                 // TODO: add support
             }
             else if (expr.index() == String) {
-                // TODO: add support
+                std::cout << GETSTRING(expr)->visit();
             }
             std::cout << " ";
         }
         std::cout << '\n';
     }
 };
+// variable
 template <typename T>
 class Var : public ASTNode<T> {
 public:
@@ -119,11 +168,12 @@ template <>
 inline int Var<int>::visit() {
     return std::get<int>(st->peek()[name]);
 }
+// assignment statement
 template <typename T>
 class Assign : public ASTNode<void> {
 public:
     ptr<Var<T>> var;
-    ptr<ASTNode<T>> rhs; // trust trust
+    ptr<ASTNode<T>> rhs;
     Assign(ptr<Var<T>> var, ptr<ASTNode<T>> rhs) {
         this->var = std::move(var);
         this->rhs = std::move(rhs);
@@ -132,6 +182,7 @@ public:
         var->st->peek()[var->name] = rhs->visit();
     }
 };
+// main body
 class Main : public ASTNode<void> {
 public:
     std::vector<ptr<ASTNode<void>>> statements;
@@ -141,6 +192,7 @@ public:
         }
     }
 };
+// program
 class Program : public ASTNode<void> {
 public:
     ptr<Main> main;

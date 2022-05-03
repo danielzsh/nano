@@ -1,1 +1,2 @@
+# error: no start keyword
 print(2)

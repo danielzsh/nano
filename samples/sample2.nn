@@ -1,0 +1,8 @@
+# Should print:
+# hi
+# hihi
+# hi 3 times: hihihi
+start
+print('hi')
+print('hi' * 2)
+print('hi 3 times: ' + 'hi' * 3)
