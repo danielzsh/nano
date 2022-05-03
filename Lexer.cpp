@@ -5,13 +5,15 @@
 #include "Lexer.h"
 #include <iostream>
 namespace Lexer {
-    Lexer::Lexer(std::string input) {
-        this->input = input;
+    Lexer::Lexer(std::string input, bool jit) {
+        if (jit) this->jit = jit;
+        else this->input = input;
         for (int i = 0; i < keywords.size(); i++) {
             kwd_index[keywords[i]] = i;
         }
     }
     char Lexer::nextChar() {
+        if (jit) return getchar();
         if (++pos >= input.size()) return EOF;
         return input[pos];
     }

@@ -1,0 +1,6 @@
+start
+assign 2 to x
+assign 2 + x to y
+print(x)
+print(y)
+print(x + y)

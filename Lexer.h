@@ -17,16 +17,17 @@ namespace Lexer {
     private:
         char c = ' ';
         char nextChar();
+        bool jit = false;
+        std::string input = "";
+        int pos = -1;
     public:
-        Lexer(std::string input);
+        Lexer(std::string input, bool jit = false);
         int line = 1;
         std::string identifierStr = "";
         double numVal = 0;
         std::vector<std::string> keywords =
                 {"print", "start", "export", "import", "from", "is", "def", "assign", "to"};
         std::map<std::string, int> kwd_index;
-        std::string input;
-        int pos = -1;
         int gettok();
     };
 

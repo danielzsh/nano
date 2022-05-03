@@ -2,30 +2,38 @@
 // Created by danie on 4/30/2022.
 //
 
-#include "Parser.h"
-namespace Parser {
-    bool Parser::isKwd(const std::string& kwd) {
+#include "Runner.h"
+namespace Runner {
+    bool Runner::isKwd(const std::string& kwd) {
         return (tok - 1000 == lexer.kwd_index[kwd]);
     }
-    Parser::Parser(std::string input) : lexer(input) {
+    Runner::Runner(std::string input, bool jit) : lexer(input, jit) {
         tok = lexer.gettok();
+        this->jit = jit;
+        st = std::make_shared<Stack>();
     }
-    ptr<Program> Parser::parseProgram() {
+
+    void Runner::run() {
+        ptr<Program> prgm = parseProgram();
+        if (!jit) prgm->visit();
+    }
+    ptr<Program> Runner::parseProgram() {
         ptr<Program> prgm = std::make_unique<Program>();
         if (isKwd("start")) {
-            tok = lexer.gettok();
             prgm->main = parseMain();
         }
+        else throw std::string("Expected function definition or keyword start.");
         return prgm;
     }
-    ptr<Main> Parser::parseMain() {
+    ptr<Main> Runner::parseMain() {
         ptr<Main> main = std::make_unique<Main>();
-        while (tok != tok_eof) {
-            main->statements.push_back(std::move(parseStatement())); // add statement to body
+        while ((tok = lexer.gettok()) != tok_eof) {
+            if (jit) parseStatement()->visit();
+            else main->statements.push_back(std::move(parseStatement())); // add statement to body
         }
         return main;
     }
-    ptr<ASTNode<void>> Parser::parseStatement() {
+    ptr<ASTNode<void>> Runner::parseStatement() {
         if (isKwd("assign")) {
             tok = lexer.gettok();
             node rhs = std::move(parseExpr());
@@ -36,7 +44,6 @@ namespace Parser {
             std::string name = lexer.identifierStr;
             varTypes[name] = static_cast<Type>(rhs.index());
             varNames.insert(name);
-            tok = lexer.gettok();
             if (varTypes[name] == Int) {
                 return std::make_unique<Assign<int>>(std::make_unique<Var<int>>(name, st), std::move(GETINT(rhs)));
             }
@@ -53,12 +60,11 @@ namespace Parser {
                 else if (tok != ')') throw std::string("Expected , or () in print statement on line " + std::to_string(lexer.line));
 
             }
-            tok = lexer.gettok();
             return print;
         }
     }
     // TODO: operator precedence parsing?
-    node Parser::parseExpr() {
+    node Runner::parseExpr() {
         node Node = std::move(parseTerm());
         while (tok == '+' || tok == '-') {
             char op = tok;
@@ -71,7 +77,7 @@ namespace Parser {
         }
         return Node;
     }
-    node Parser::parseTerm() {
+    node Runner::parseTerm() {
         node Node = std::move(parseFactor());
         while (tok == '*' || tok == '/') {
             char op = tok;
@@ -84,7 +90,7 @@ namespace Parser {
         }
         return Node;
     }
-    node Parser::parseFactor() {
+    node Runner::parseFactor() {
         node Node;
         if (tok == tok_number) {
             double num = lexer.numVal;
@@ -104,4 +110,4 @@ namespace Parser {
             // TODO: add support for other types
         }
     }
-} // Parser
+} // Runner

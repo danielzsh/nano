@@ -18,10 +18,12 @@ enum Type {
 };
 template <typename T>
 using ptr = std::unique_ptr<T>;
+// abstract base class for all nodes
 template <typename T>
 class ASTNode {
 public:
     Type type = Void;
+    // process a node
     virtual T visit() = 0;
     virtual ~ASTNode() = 0;
 };
@@ -41,6 +43,7 @@ public:
         return value;
     }
 };
+// represents binary operations
 template <typename T1, typename T2, typename T3>
 class BinOp : public ASTNode<T3> {
 public:

@@ -7,25 +7,27 @@
 #include "AST.h"
 #include <cmath>
 #include <set>
-namespace Parser {
+namespace Runner {
 
-    class Parser {
+    class Runner {
     private:
         int tok;
         Lexer::Lexer lexer;
         bool isKwd(const std::string&);
         std::map<std::string, Type> varTypes;
         std::set<std::string> varNames;
+        bool jit = false;
+        std::shared_ptr<Stack> st;
 
     public:
-        std::shared_ptr<Stack> st; // TODO: make st shared_ptr
-        Parser(std::string input);
+        Runner(std::string input, bool jit = false);
         ptr<Program> parseProgram();
         ptr<Main> parseMain();
         ptr<ASTNode<void>> parseStatement();
         node parseExpr();
         node parseTerm();
         node parseFactor();
+        void run();
     };
 
-} // Parser
+} // Runner
