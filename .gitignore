@@ -1,2 +1,7 @@
 # Project exclude paths
 /cmake-build-debug/
+/build.ninja
+/cmake_install.cmake
+/CMakeCache.txt
+/.ninja_deps
+/.ninja_log
