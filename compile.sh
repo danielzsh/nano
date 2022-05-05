@@ -1,0 +1,1 @@
+g++ -std=c++17 main.cpp Lexer.cpp Runner.cpp Stack.cpp -o ./nano
