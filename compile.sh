@@ -1,1 +1,1 @@
-g++ -std=c++17 main.cpp Lexer.cpp Runner.cpp Stack.cpp -o ./nano
+g++ -std=c++17 src/main.cpp src/Lexer.cpp src/Runner.cpp src/Stack.cpp -o ./nano
