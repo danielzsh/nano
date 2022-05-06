@@ -168,6 +168,10 @@ template <>
 inline int Var<int>::visit() {
     return std::get<int>(st->peek()[name]);
 }
+template <>
+inline std::string Var<std::string>::visit() {
+    return std::get<std::string>(st->peek()[name]);
+}
 // assignment statement
 template <typename T>
 class Assign : public ASTNode<void> {

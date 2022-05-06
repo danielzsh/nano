@@ -47,6 +47,9 @@ namespace Runner {
             if (varTypes[name] == Int) {
                 return std::make_unique<Assign<int>>(std::make_unique<Var<int>>(name, st), std::move(GETINT(rhs)));
             }
+            if (varTypes[name] == String) {
+                return std::make_unique<Assign<std::string>>(std::make_unique<Var<std::string>>(name, st), std::move(GETSTRING(rhs)));
+            }
             // TODO: add other types
         }
         if (isKwd("print")) {
@@ -125,6 +128,9 @@ namespace Runner {
             tok = lexer.gettok();
             if (varTypes[varName] == Int) {
                 return std::make_unique<Var<int>>(varName, st);
+            }
+            if (varTypes[varName] == String) {
+                return std::make_unique<Var<std::string>>(varName, st);
             }
             // TODO: add support for other types
         }
