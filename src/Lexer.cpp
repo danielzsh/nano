@@ -42,12 +42,14 @@ namespace Lexer {
         }
         if (std::isdigit(c) || c == '.') {
             std::string numStr;
+            int type = tok_int;
             do {
+                if (c == '.') type = tok_double;
                 numStr += c;
                 c = nextChar();
             } while (std::isdigit(c) || c == '.');
             numVal = strtod(numStr.c_str(), nullptr);
-            return tok_number;
+            return type;
         }
         // string
         if (c == '\'') {

@@ -8,9 +8,10 @@
 #include <map>
 enum Token {
     tok_identifier = -1,
-    tok_number = -2,
-    tok_eof = -3,
-    tok_string = -4
+    tok_int = -2,
+    tok_double = -3,
+    tok_eof = -4,
+    tok_string = -5
 };
 namespace Lexer {
 

@@ -14,6 +14,7 @@ ___
 start # mark start of main program
 # statements
 ```
+Check the `samples` folder for sample programs.
 ___
 ### Usage:
 You must download the nano file from this repository first

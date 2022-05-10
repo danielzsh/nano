@@ -10,6 +10,7 @@
 #include "Stack.h"
 #define GETINT(PTR) std::get<ptr<ASTNode<int>>>(PTR)
 #define GETSTRING(PTR) std::get<ptr<ASTNode<std::string>>>(PTR)
+#define GETDOUBLE(PTR) std::get<ptr<ASTNode<double>>>(PTR)
 #define ISTYPE(T1, T2) std::is_same_v<T1, T2>
 enum Type {
     Int = 0,
@@ -68,6 +69,12 @@ public:
         }
         else if constexpr(ISTYPE(T1, std::string) && ISTYPE(T2, std::string)) {
             this->type = String;
+        }
+        else if constexpr(ISTYPE(T1, double) && ISTYPE(T2, double)) {
+            this->type = Double;
+        }
+        else if constexpr(ISTYPE(T1, double) && ISTYPE(T2, int) || ISTYPE(T1, int) && ISTYPE(T2, double)) {
+            this->type = Double;
         }
         // replace this later
 //        else if (left.index() == String && right.index() == String) {
@@ -136,6 +143,51 @@ inline std::string BinOp<std::string, std::string, std::string>::visit() {
     if (op == '+') return left->visit() + right->visit();
     else throw std::string("Cannot perform the following operation on two strings: " + std::to_string(op));
 }
+template <>
+inline double BinOp<double, double, double>::visit() {
+    if (op == '+') {
+        return left->visit() + right->visit();
+    }
+    else if (op == '-') {
+        return left->visit() - right->visit();
+    }
+    else if (op == '/') {
+        return left->visit() / right->visit();
+    }
+    else if (op == '*') {
+        return left->visit() * right->visit();
+    }
+}
+template <>
+inline double BinOp<double, int, double>::visit() {
+    if (op == '+') {
+        return left->visit() + right->visit();
+    }
+    else if (op == '-') {
+        return left->visit() - right->visit();
+    }
+    else if (op == '/') {
+        return left->visit() / right->visit();
+    }
+    else if (op == '*') {
+        return left->visit() * right->visit();
+    }
+}
+template <>
+inline double BinOp<int, double, double>::visit() {
+    if (op == '+') {
+        return left->visit() + right->visit();
+    }
+    else if (op == '-') {
+        return left->visit() - right->visit();
+    }
+    else if (op == '/') {
+        return left->visit() / right->visit();
+    }
+    else if (op == '*') {
+        return left->visit() * right->visit();
+    }
+}
 class Print : public ASTNode<void> {
 public:
     std::vector<node> exprs;
@@ -145,7 +197,7 @@ public:
                 std::cout << GETINT(expr)->visit();
             }
             else if (expr.index() == Double) {
-                // TODO: add support
+                std::cout << GETDOUBLE(expr)->visit();
             }
             else if (expr.index() == String) {
                 std::cout << GETSTRING(expr)->visit();
@@ -167,6 +219,10 @@ public:
 template <>
 inline int Var<int>::visit() {
     return std::get<int>(st->peek()[name]);
+}
+template <>
+inline double Var<double>::visit() {
+    return std::get<double>(st->peek()[name]);
 }
 template <>
 inline std::string Var<std::string>::visit() {

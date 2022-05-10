@@ -47,6 +47,9 @@ namespace Runner {
             if (varTypes[name] == Int) {
                 return std::make_unique<Assign<int>>(std::make_unique<Var<int>>(name, st), std::move(GETINT(rhs)));
             }
+            if (varTypes[name] == Double) {
+                return std::make_unique<Assign<double>>(std::make_unique<Var<double>>(name, st), std::move(GETDOUBLE(rhs)));
+            }
             if (varTypes[name] == String) {
                 return std::make_unique<Assign<std::string>>(std::make_unique<Var<std::string>>(name, st), std::move(GETSTRING(rhs)));
             }
@@ -86,6 +89,9 @@ namespace Runner {
             if (Node.index() == String && rhs.index() == String) {
                 Node = std::make_unique<BinOp<std::string, std::string, std::string>>(std::move(GETSTRING(Node)), std::move(GETSTRING(rhs)), op);
             }
+            if (Node.index() == Double && rhs.index() == Double) {
+                Node = std::make_unique<BinOp<double, double, double>>(std::move(GETDOUBLE(Node)), std::move(GETDOUBLE(rhs)), op);
+            }
             // TODO: add support for other types
         }
         return Node;
@@ -108,16 +114,29 @@ namespace Runner {
             if (Node.index() == String && rhs.index() == String) {
                 Node = std::make_unique<BinOp<std::string, std::string, std::string>>(std::move(GETSTRING(Node)), std::move(GETSTRING(rhs)), op);
             }
+            if (Node.index() == Double && rhs.index() == Double) {
+                Node = std::make_unique<BinOp<double, double, double>>(std::move(GETDOUBLE(Node)), std::move(GETDOUBLE(rhs)), op);
+            }
+            if (Node.index() == Double && rhs.index() == Int) {
+                Node = std::make_unique<BinOp<double, int, double>>(std::move(GETDOUBLE(Node)), std::move(GETINT(rhs)), op);
+            }
+            if (Node.index() == Int && rhs.index() == Double) {
+                Node = std::make_unique<BinOp<int, double, double>>(std::move(GETINT(Node)), std::move(GETDOUBLE(rhs)), op);
+            }
             // TODO: add support for other types
         }
         return Node;
     }
     node Runner::parseFactor() {
         node Node;
-        if (tok == tok_number) {
+        if (tok == tok_int) {
+            int num = lexer.numVal;
+            tok = lexer.gettok();
+            return std::make_unique<Val<int>>(num);
+        }
+        else if (tok == tok_double) {
             double num = lexer.numVal;
             tok = lexer.gettok();
-            if (num == std::floor(num)) return std::make_unique<Val<int>>(num);
             return std::make_unique<Val<double>>(num);
         }
         else if (tok == tok_identifier) {
@@ -132,7 +151,9 @@ namespace Runner {
             if (varTypes[varName] == String) {
                 return std::make_unique<Var<std::string>>(varName, st);
             }
-            // TODO: add support for other types
+            if (varTypes[varName] == Double) {
+                return std::make_unique<Var<double>>(varName, st);
+            }
         }
         else if (tok == tok_string) {
             std::string str = lexer.identifierStr;
